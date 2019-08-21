@@ -26,8 +26,12 @@ if !exists('g:lastplace_ignore_buftype')
 	let g:lastplace_ignore_buftype = "quickfix,nofile,help"
 endif
 
+if !exists('g:lastplace_ignore_centering')
+    let g:lastplace_ignore_centering = 0
+endif
+
 fu! s:lastplace()
-	if index(split(g:lastplace_ignore_buftype, ","), &buftype) != -1 
+	if index(split(g:lastplace_ignore_buftype, ","), &buftype) != -1
 		return
    	endif
 
@@ -56,7 +60,11 @@ fu! s:lastplace()
 		elseif line("$") - line("'\"") > ((line("w$") - line("w0")) / 2) - 1
 			"if we're not at the bottom of the file, center the
 			"cursor on the screen after we make the jump
-			execute "normal! g`\"zz"
+            if get(g:, 'lastplace_ignore_centering', 0) == 1
+                execute "normal! g`\""
+            else
+                execute "normal! g`\"zz"
+            endif
 
 		else
 			"otherwise, show as much context as we can by jumping
@@ -65,12 +73,20 @@ fu! s:lastplace()
 			"bottom of the screen. We intentionally leave the
 			"last line blank by pressing <c-e> so the user has a
 			"clue that they are near the end of the file.
-			execute "normal! \G'\"\<c-e>"
+            if get(g:, 'lastplace_ignore_centering', 0) == 1
+                execute "normal! g`\""
+            else
+                execute "normal! \G'\"\<c-e>"
+            endif
 		endif
 	endif
 	if foldclosed(".") != -1 && g:lastplace_open_folds
 		"if we're in a fold, make the current line visible and recenter screen
-		execute "normal! zvzz"
+        if get(g:, 'lastplace_ignore_centering', 0) == 1
+            execute "normal! zv"
+        else
+            execute "normal! zvzz"
+        endif
 	endif
 endf
 
